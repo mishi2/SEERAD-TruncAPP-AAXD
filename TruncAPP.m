@@ -1,3 +1,5 @@
+clc;
+clear all;
 %TruncAPP High Level Implementation Code the input bit length N, truncation length t, and inputs a(dividend) b(divisor) are the simulation parameters
 %4 FUNCTIONS ARE Identically From SEERAD IMPLEMENTATION%
 % (A/B)app = 2^ Ka-Kb X (Xa)t X (1/(Xb)t)app
@@ -9,15 +11,14 @@
 %efficient/accurate however to make it output of the first sign detection function:
 A='00110101';  %Makesure bitsize are the same
 B='00001101';  %Makesure bitsize are the same
-t=6;
+t=6; %truncation length
 
 
 
 
 
 
-%Block1_SignDetector -- Could be cleaner and more efficient to create functions to
-%represent each block of circuit diagram.
+%Block1_SignDetector -- functions to represent each block of circuit diagram.
 % Inputs: A, B (n bits)    Outputs: [A] and [B] absolute value (n-1 bits)
 %Compares inputs' MSBs, compares them (same = positive,
 % different=negative), and truncates the sign msb to yield absolute values
@@ -30,8 +31,8 @@ t=6;
 %Basically the floor minimum value of B looking at only the MSB, 0s follow
 %the msb.. Same rounding function from seerad, but as opposed to seerad, this output is derived for both the
 %dividend and the divisor... NEED to run this function twice, once for each operand ([A] and [B]).
-[Ka, Ka_bitsize, ka_Index] = Rounding(A_abs);   %Ka is the log2(2n) representation of the MSB position K
-[Kb, Kb_bitsize, kb_Index] = Rounding(B_abs);
+[Ka, Ka_bitsize, ka_Index] = Rounding(A_app);   %Ka is the log2(2n) representation of the MSB position K
+[Kb, Kb_bitsize, kb_Index] = Rounding(B_app);
 
 
 %Block3_TruncationUnit -- Inputs(n-1 bits): Ka,Kb,[A],[B]  Outputs(t bits):
@@ -43,7 +44,7 @@ t=6;
 %for mixtures of 1's and 0's for LSBs.
 %XAt and XBt will be in t-bit string binary representation of the integer and
 %fraction parts.
-[XAt,XBt] = TruncationUnit(Ka,Kb,A_app, B_app,t);
+[XAt,XBt,XAt_Bitsize,XBt_Bitsize] = TruncationUnit(Ka,Kb,A_app, B_app,t);
 
 %Block4_InverseUnit -- Input(t bits): [Xb]t     Output(t bits): 1/[Xb]t
 %B inversion: (1/(Xb)t)app  = Bit-Inverse(Xb + 1) / 2 this is the inverse
@@ -63,7 +64,7 @@ t=6;
 % Kb-Ka or be shifted to the left by Ka-Kb depending on which value is
 % greater in  the  Shift  unit.  
 %*** Might Be able to interchangeably use Block4 SEERAD Multiplier for this Function.***%
-[Q_abs, Q_abs_Bitsize] = Shifter_TruncAPP(XAtDIVXBt, ka_Index, kb_Index,t,nA);
+[Q_abs, Q_abs_Bitsize,i] = Shifter_TruncAPP(XAtDIVXBt, ka_Index, kb_Index,t,nA);
 %Q_abs_Bitsize needs to be 2n+2t-4 bits use t and nA to enforce/ check this.
 
 %Block7_SignSet -- Input (2n+2t-4 bits): (2^(Ka-Kb) X [Xa]t)/[Xb]t
@@ -73,3 +74,12 @@ t=6;
 %unit passes its input to the output. In the other case, the bits of 
 %the input is inverted and passed to the output. 
 [Q_app, Q_Bitsize] = SignSet_TruncAPP(Q_abs, sign);
+Q_app
+Q_app_dec=f_b2d(Q_app)
+
+
+
+%Error
+ADivB_Exact=(f_b2d(A)./f_b2d(B))
+ADivB_Exact_bin=f_d2b((f_b2d(A)./f_b2d(B)))
+MRE= abs(f_b2d(Q_app)-ADivB_Exact)/ADivB_Exact %MRE in Decimal format

@@ -1,3 +1,5 @@
+ clc;
+ clear all;
 %AAXD Adaptive Approximation High Level Implementation: the inputs
 %a(dividend) b(divisor) are the simulation parameters as well as the desired reduced bit width of truncation (k).
 %For when Lb > k-1 : (A/B)app = [Ap/Bp]2^(La-Lb-k)
@@ -9,9 +11,11 @@
 
 %CREATE PARAMETERS FIRST (A,B,k): 
 %%UNSIGNED OPERANDS ONLY%%
-A='011101011110111011';
-B='010001111';
-k='8'; %The reduced width bit for tuncation and divider 2(k+1)/k+1
+A='001101011110111011'; %2n
+B='010001111';  %n
+nA=length(A);
+nB=length(B);
+k=8; %The reduced width bit for tuncation and divider 2(k+1)/k+1
 
 
 
@@ -39,17 +43,18 @@ k='8'; %The reduced width bit for tuncation and divider 2(k+1)/k+1
 %Block3_Divider(2(k+1)/(k+1)) -- Input(2k bit Dividend and K bit Divisor): Ap and Bp  
 %Output(k+1 bit Quotient): Qp
 %This Performs Regular Divison of the Pruned-Bit Division operands to yield Qp.
-[Qp, Qp_Bitsize] = ReducedWithDivider(Bp, Ab);
+[Qp, Qp_Bitsize] = ReducedWithDivider(Bp, Ap,k);
 
 %Block4_Subtractor -- Input(LogBase2(2n) bits): La and Lb    OUTPUT(LogBase2(2n)+1 bits): La-Lb 
 %this is used to shift the quotient in the next block
 La_minus_Lb = La-Lb;
 
+
 %Block5_Shifter -- Inputs(LogNase2(2n)+1 bit and k+1 bit): (La-Lb) and Qp
 %OUTPUT(n+1 bit):Qs
 %Barrel Shift Qp to the left or right depeneding on La-Lb subtraction.
 %Qs_Bitsize needs to be 2n+2t-4 bits use t and nA to enforce/ check this.
-[Qs, Qs_Bitsize] = Shifter_AAXD(Qp,La_minus_Lb,t,nA);
+[Qs, Qs_Bitsize] = Shifter_AAXD(Qp,La_minus_Lb,k,nB);
 
 %Block6_ErrorCorrection -- Input(n+1 bit):Qs   OUTPUT(n bit): Q
 
@@ -61,3 +66,10 @@ La_minus_Lb = La-Lb;
 % by 38.63%.  For  a more  accurate  configuration  using  a 12/6 divider,  
 %the  AAXD is  26.54%  faster  and  34.13%  more  power  efficient  than  the accurate  design
 [Q,Q_Bitsize] = ErrorCorrector(Qs, Qs_Bitsize);
+Q
+Q_dec=f_b2d(Q)
+
+%Error
+ADivB_Exact_bin=f_d2b((f_b2d(A)./f_b2d(B)))
+ADivB_Exact=(f_b2d(A)./f_b2d(B))
+MRE= abs(Q_dec-ADivB_Exact)/ADivB_Exact %MRE in Decimal format

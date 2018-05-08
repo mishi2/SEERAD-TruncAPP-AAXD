@@ -17,10 +17,10 @@ Ap= A((length(A)-La):((length(A)-La)+(2*k)));  %Truncated bits
 
 else          % Fig 4 Pruning Scheme --- Appending Required
 Ap= A((length(A)-La):length(A));   %No binary Decimals yet   
-   if ((length(A)+1)<(2*k))
+   if length(A)+1<2*k
    Ap((length(A)+1):(2*k))='0';    %Appended Bits 
    end
-   if ((length(A)+1)==(2*k))
+   if length(A)+1==2*k
    Ap((2*k))='0'; 
    end
 
@@ -34,10 +34,12 @@ Bp= B((length(B)-Lb):((length(B)-Lb)+k));  %Truncated bits
 
 else             % Fig 4 Pruning Scheme --- Appending Required
  Bp = B((length(B)-Lb):length(B));
-  if (length(Bp+1)<k)
-  Bp((length(B)+1):k)='0';    %Appended Bits 
+  if length(B)+1<k
+  Bp((length(B)+1):k)='0';    %Appended Bits
+%    Bp(1:k)='0';
+%  Bp(1:length((length(B)-Lb):length(B))) = B((length(B)-Lb):length(B));
   end
-   if ((length(B)+1)==k)
+   if length(B)+1==k
    Bp(k)='0'; 
    end
  

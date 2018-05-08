@@ -1,4 +1,4 @@
-function [Qp, Qp_Bitsize] = ReducedWithDivider(Bp, Ab) %k bit output
+function [Qp, Qp_Bitsize] = ReducedWithDivider(Bp, Ap,k) %k bit output
 
 %2 Different Divison Formulas (3) or (4), depending on the inequalities of La and
 %Lb with 2k-1 and k-1 respectively..
@@ -14,14 +14,16 @@ function [Qp, Qp_Bitsize] = ReducedWithDivider(Bp, Ab) %k bit output
 %by  adding  two  ‘0’s  at  the (2k+ 2)th and (2k+ 1)th bit positions; a ‘0’ is added to the(k+ 1)th
 %bit  position  of  the  pruned  divisor.  Then,  a 2(k+ 1)/(k+ 1)divider is used to compute the division
 
-Ap_Appended(1:2)='0';   %For the 2k+2 bits setup for divider
-Ap_Appended(3:(length(Ab)+2))=Ab; 
+Ap_Appended(1:2)='0';   %For the 2k+2 bits setup for divider to ensure we keep the ratio of bits and deduce a 2(k+1)/k+1 bit quotient
+Ap_Appended(3:(length(Ap)+2))=Ap; 
  
-Bp_Appended(1)='0';  %For the 2k+2 bits setup for divider
-Bp_Appended(2:(length(Bb)+1))=Bp; 
+Bp_Appended(1)='0';  %For the k+1 bits setup for divider
+Bp_Appended(2:(length(Bp)+1))=Bp; 
  
 
-Qp= f_d2b((f_b2d(Ap_Appended))./(f_b2d(Bp_Appended)));
+Qp_unreduced= f_d2b((f_b2d(Ap_Appended))./(f_b2d(Bp_Appended)));
+
+Qp=Qp_unreduced(1:k+1);
 
 decimal=0;
 i=1;

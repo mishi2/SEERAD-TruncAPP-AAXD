@@ -7,7 +7,7 @@ XADIVXB = f_d2b(f_b2d(XAt).*f_b2d(XBt_Inverse));
    else
       XAtDIVXBt=XADIVXB;
        XAtDIVXBt(((2*t+1)-length(XADIVXB)):(2*t+1))='0';
-       
+   end 
        XAtDIVXBt_Bitsize = length(XAtDIVXBt);
       
     end    
